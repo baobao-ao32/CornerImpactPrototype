@@ -38,6 +38,10 @@ public class TargetWalker : MonoBehaviour
     private float traveledDistance;
     private float waitTimer;
 
+    public bool IsWalking => isWalking;
+    public bool HasFinishedWalk { get; private set; }
+    public Vector3 CurrentMoveDirection => normalizedDirection * directionSign;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -103,6 +107,7 @@ public class TargetWalker : MonoBehaviour
             }
         }
         else {
+            HasFinishedWalk = true;
             StopWalking();
         }
     }
@@ -122,6 +127,7 @@ public class TargetWalker : MonoBehaviour
 
         directionSign = 1;
         traveledDistance = 0f;
+        HasFinishedWalk = false;
 
         if (freezeTiltWhileWalking) {
             rb.constraints =

@@ -2,6 +2,13 @@ using UnityEngine;
 
 public class PrototypeGameManager : MonoBehaviour
 {
+    private enum RoundState
+    {
+        Playing,
+        Hit,
+        Miss
+    }
+
     [SerializeField] private Transform player;
     [SerializeField] private Transform target;
 
@@ -14,7 +21,17 @@ public class PrototypeGameManager : MonoBehaviour
 
     [Header("GUI")]
     [SerializeField] private Color guiTextColor = Color.black;
-    [SerializeField] private int guiFontSize = 30;
+    [SerializeField] private int guiFontSize = 100;
+
+    [Header("Miss")]
+    [SerializeField] private float missArmDistance = 15f;
+    [SerializeField] private float missDistance = 35f;
+    [SerializeField] private float passMissDistance = 5f;
+
+    private RoundState roundState = RoundState.Playing;
+    private bool missCheckArmed;
+    private float closestPlayerTargetDistance;
+
 
     private GUIStyle labelStyle;
 
@@ -49,6 +66,10 @@ public class PrototypeGameManager : MonoBehaviour
 
         targetStartPosition = target.position;
         targetStartRotation = target.rotation;
+
+        roundState = RoundState.Playing;
+        missCheckArmed = false;
+        closestPlayerTargetDistance = float.PositiveInfinity;
     }
 
     // Update is called once per frame
@@ -57,6 +78,70 @@ public class PrototypeGameManager : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.R)) {
             ResetScene();
         }
+
+        UpdateRoundState();
+    }
+
+    private void UpdateRoundState()
+    {
+        if (roundState != RoundState.Playing) {
+            return;
+        }
+
+        if (playerImpactLauncher != null && playerImpactLauncher.HasLaunched) {
+            roundState = RoundState.Hit;
+            return;
+        }
+
+        if (HasTargetPassedPlayer()) {
+            SetMiss();
+            return;
+        }
+
+        if (targetWalker != null && targetWalker.HasFinishedWalk) {
+            SetMiss();
+        }
+    }
+
+    private bool HasTargetPassedPlayer()
+    {
+        if (targetWalker == null) {
+            return false;
+        }
+
+        if (!targetWalker.IsWalking) {
+            return false;
+        }
+
+        Vector3 moveDirection = targetWalker.CurrentMoveDirection;
+        moveDirection.y = 0f;
+
+        if (moveDirection.sqrMagnitude < 0.001f) {
+            return false;
+        }
+
+        moveDirection.Normalize();
+
+        Vector3 fromPlayerToTarget = target.position - player.position;
+        fromPlayerToTarget.y = 0f;
+
+        float signedDistanceAlongMoveDirection = Vector3.Dot(
+            fromPlayerToTarget,
+            moveDirection
+        );
+
+        return signedDistanceAlongMoveDirection > passMissDistance;
+    }
+
+    private void SetMiss()
+    {
+        roundState = RoundState.Miss;
+
+        if (cameraFollow != null) {
+            cameraFollow.FollowPlayer(true);
+        }
+
+        Debug.Log("Miss");
     }
 
     private void OnGUI()
@@ -72,14 +157,27 @@ public class PrototypeGameManager : MonoBehaviour
             return;
         }
 
+        if (roundState == RoundState.Playing) {
+            GUI.Label(new Rect(10, 10, 500, 30), "Playing", labelStyle);
+            GUI.Label(new Rect(10, 35, 800, 30), "W/S/A/D: Move, Space: Jump, R: Reset", labelStyle);
+            return;
+        }
+
+        if (roundState == RoundState.Miss) {
+            GUI.Label(new Rect(10, 10, 700, 30), "MISS!!", labelStyle);
+            GUI.Label(new Rect(10, 35, 900, 30), "R: Reset", labelStyle);
+            return;
+        }
+
         float displayDistance = targetFlightTracker.IsLanded
             ? targetFlightTracker.FinalDistance
             : targetFlightTracker.CurrentDistance;
 
-        GUI.Label(new Rect(10, 10, 500, 30), $"Distance: {displayDistance:F2} m", labelStyle);
-        GUI.Label(new Rect(10, 35, 500, 30), $"Max Height: {targetFlightTracker.MaxHeight:F2} m", labelStyle);
-        GUI.Label(new Rect(10, 60, 500, 30), $"Flight Time: {targetFlightTracker.FlightTime:F2} s", labelStyle);
-        GUI.Label(new Rect(10, 85, 800, 30), "W: Forward, S: Back, A/D: Move, Space: Jump, R: Reset", labelStyle);
+        GUI.Label(new Rect(10, 10, 700, 30), "HIT!!", labelStyle);
+        GUI.Label(new Rect(10, 35, 700, 30), $"Distance: {displayDistance:F2} m", labelStyle);
+        GUI.Label(new Rect(10, 60, 700, 30), $"Max Height: {targetFlightTracker.MaxHeight:F2} m", labelStyle);
+        GUI.Label(new Rect(10, 85, 700, 30), $"Flight Time: {targetFlightTracker.FlightTime:F2} s", labelStyle);
+        GUI.Label(new Rect(10, 110, 900, 30), "R: Reset", labelStyle);
     }
 
     private void ResetScene()
@@ -106,6 +204,8 @@ public class PrototypeGameManager : MonoBehaviour
         if (targetWalker != null) {
             targetWalker.ResetWalkState();
         }
+
+        roundState = RoundState.Playing;
     }
 
     private void ResetBody(Transform bodyTransform, Rigidbody bodyRb, Vector3 position, Quaternion rotation)

@@ -31,6 +31,8 @@ public class PlayerImpactLauncher : MonoBehaviour
     private Rigidbody playerRb;
     private bool hasLaunched;
 
+    public bool HasLaunched => hasLaunched;
+
     private void Awake()
     {
         playerRb = GetComponent<Rigidbody>();
