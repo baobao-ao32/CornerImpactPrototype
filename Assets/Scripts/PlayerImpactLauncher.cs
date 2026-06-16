@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerImpactLauncher : MonoBehaviour
@@ -16,7 +15,12 @@ public class PlayerImpactLauncher : MonoBehaviour
     [Header("Rotation")]
     [SerializeField] private float torqueMultiplier = 8f;
 
+    [Header("Camera")]
+    [SerializeField] private CameraFollow cameraFollow;
+    [SerializeField] private bool switchCameraOnImpact = true;
+
     private Rigidbody playerRb;
+    private bool hasLaunched;
 
     private void Awake()
     {
@@ -25,6 +29,8 @@ public class PlayerImpactLauncher : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (hasLaunched) return;
+
         if(!collision.gameObject.CompareTag(targetTag)) {
             return;
         }
@@ -57,10 +63,23 @@ public class PlayerImpactLauncher : MonoBehaviour
             ForceMode.Impulse
         );
 
-        // 宙に浮いている間は雑に回転させる。
+        // 宙に浮いている間は雑に回転させる
         Vector3 torqueAxis = Vector3.Cross(launchDir, Vector3.up).normalized;
-        targetRb.AddTorque(torqueAxis * impactSpeed * torqueMultiplier, ForceMode.Impulse);
+        if (torqueAxis.sqrMagnitude > 0.001f) {
+            targetRb.AddTorque(torqueAxis * impactSpeed * torqueMultiplier, ForceMode.Impulse);
+        }
+
+        hasLaunched = true;
+
+        if (switchCameraOnImpact && cameraFollow != null) {
+            cameraFollow.FollowLaunchedTarget(targetRb.transform);
+        }
 
         Debug.Log($"Impact!! speed={impactSpeed:F2}, impulse={impulse:F2}");
+    }
+
+    public void ResetImpactState()
+    {
+        hasLaunched = false;
     }
 }
