@@ -16,6 +16,9 @@ public class TargetWalker : MonoBehaviour
     [SerializeField] private WalkMode walkMode = WalkMode.PingPong;
     [SerializeField] private bool walkOnStart = true;
 
+    [Header("Timing")]
+    [SerializeField] private float startDelay = 1.5f;
+
     [Header("Physics")]
     [SerializeField] private bool freezeTiltWhileWalking = true;
 
@@ -23,9 +26,12 @@ public class TargetWalker : MonoBehaviour
     private Vector3 normalizedDirection;
     private RigidbodyConstraints originalConstraints;
 
+    private bool isWaiting;
     private bool isWalking;
+
     private int directionSign = 1;
     private float traveledDistance;
+    private float waitTimer;
 
     private void Awake()
     {
@@ -39,8 +45,28 @@ public class TargetWalker : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (isWaiting) {
+            UpdateWaiting();
+            return;
+        }
+
         if (!isWalking) return;
 
+        MoveTarget();
+    }
+
+    private void UpdateWaiting()
+    {
+        waitTimer -= Time.fixedDeltaTime;
+
+        if (waitTimer <= 0f) {
+            isWaiting = false;
+            isWalking = true;
+        }
+    }
+
+    private void MoveTarget()
+    {
         float moveAmount = Mathf.Abs(walkSpeed) * Time.fixedDeltaTime;
         float remainingDistance = walkDistance - traveledDistance;
         float actualMoveAmount = Mathf.Min(moveAmount, remainingDistance);
@@ -80,7 +106,6 @@ public class TargetWalker : MonoBehaviour
     {
         normalizedDirection = GetNormalizedWalkDirection();
 
-        isWalking = walkOnStart;
         directionSign = 1;
         traveledDistance = 0f;
 
@@ -89,6 +114,16 @@ public class TargetWalker : MonoBehaviour
                 originalConstraints |
                 RigidbodyConstraints.FreezeRotationX |
                 RigidbodyConstraints.FreezeRotationZ;
+        }
+
+        if (walkOnStart) {
+            waitTimer = Mathf.Max(0f, startDelay);
+            isWaiting = waitTimer > 0f;
+            isWalking = waitTimer <= 0f;
+        }
+        else {
+            isWaiting = false;
+            isWalking = false;
         }
     }
 
