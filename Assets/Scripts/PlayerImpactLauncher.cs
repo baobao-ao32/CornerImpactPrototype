@@ -77,6 +77,11 @@ public class PlayerImpactLauncher : MonoBehaviour
             minImpulse, maxImpulse
         );
 
+        TargetWalker targetWalker = collision.gameObject.GetComponent<TargetWalker>();
+        if (targetWalker != null) {
+            targetWalker.StopWalking();
+        }
+
         ContactPoint contact = collision.GetContact(0);
 
         targetRb.AddForceAtPosition(

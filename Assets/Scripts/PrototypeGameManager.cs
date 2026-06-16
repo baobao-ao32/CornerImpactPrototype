@@ -10,6 +10,7 @@ public class PrototypeGameManager : MonoBehaviour
     [SerializeField] private PlayerRunner playerRunner;
     [SerializeField] private PlayerImpactLauncher playerImpactLauncher;
     [SerializeField] private TargetFlightTracker targetFlightTracker;
+    [SerializeField] private TargetWalker targetWalker;
 
     [Header("GUI")]
     [SerializeField] private Color guiTextColor = Color.black;
@@ -37,6 +38,10 @@ public class PrototypeGameManager : MonoBehaviour
 
         if (playerImpactLauncher == null) {
             playerImpactLauncher = player.GetComponent<PlayerImpactLauncher>();
+        }
+
+        if (targetWalker == null) {
+            targetWalker = target.GetComponent<TargetWalker>();
         }
 
         playerStartPosition = player.position;
@@ -96,6 +101,10 @@ public class PrototypeGameManager : MonoBehaviour
 
         if (targetFlightTracker != null) {
             targetFlightTracker.ResetStats();
+        }
+
+        if (targetWalker != null) {
+            targetWalker.ResetWalkState();
         }
     }
 
