@@ -74,7 +74,7 @@ public class PrototypeGameManager : MonoBehaviour
         GUI.Label(new Rect(10, 10, 500, 30), $"Distance: {displayDistance:F2} m", labelStyle);
         GUI.Label(new Rect(10, 35, 500, 30), $"Max Height: {targetFlightTracker.MaxHeight:F2} m", labelStyle);
         GUI.Label(new Rect(10, 60, 500, 30), $"Flight Time: {targetFlightTracker.FlightTime:F2} s", labelStyle);
-        GUI.Label(new Rect(10, 85, 600, 30), "W / Space: Forward, S: Back, A/D: Move, R: Reset", labelStyle);
+        GUI.Label(new Rect(10, 85, 800, 30), "W: Forward, S: Back, A/D: Move, Space: Jump, R: Reset", labelStyle);
     }
 
     private void ResetScene()
