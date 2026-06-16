@@ -392,6 +392,10 @@ MonoBehaviour:
   maxImpulse: 35
   upwardRatio: 0.28
   torqueMultiplier: 8
+  maxVerticalSpeedForBonus: 6
+  jumpImpulseBonus: 0.35
+  jumpUpwardRatioBonus: 0.18
+  maxUpwardRatio: 0.55
   cameraFollow: {fileID: 73038927}
   switchCameraOnImpact: 1
   targetFlightTracker: {fileID: 1359797766}
@@ -429,7 +433,7 @@ GameObject:
   - component: {fileID: 659289024}
   - component: {fileID: 659289023}
   m_Layer: 0
-  m_Name: Road
+  m_Name: Ground
   m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -481,7 +485,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 7b6f97b9863244640b8b122c1eb02bfe, type: 2}
+  - {fileID: 2100000, guid: 7f7d4464942f5854f835c533ee6d1e4c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
