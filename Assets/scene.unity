@@ -278,7 +278,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
-  m_Constraints: 112
+  m_Constraints: 80
   m_CollisionDetection: 2
 --- !u!65 &611646290
 BoxCollider:
@@ -411,6 +411,11 @@ MonoBehaviour:
   maxBackwardSpeed: 4
   acceleration: 20
   sideSpeed: 5
+  jumpImpulse: 6
+  groundCheckDistance: 0.6
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &659289022
 GameObject:
   m_ObjectHideFlags: 0

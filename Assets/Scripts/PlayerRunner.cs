@@ -10,19 +10,37 @@ public class PlayerRunner : MonoBehaviour
     // [SerializeField] private float deceleration = 12f;
     [SerializeField] private float sideSpeed = 5f;
 
+    [Header("Jump")]
+    [SerializeField] private float jumpImpulse = 6f;
+    [SerializeField] private float groundCheckDistance = 0.6f;
+    [SerializeField] private LayerMask groundLayerMask = ~0;
+
     private Rigidbody rb;
     private float forwardSpeed;
+    private bool jumpRequested;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space)) {
+            jumpRequested = true;
+        }
+    }
+
     private void FixedUpdate()
     {
+        HandleMove();
+        HandleJump();
+    }
+
+    private void HandleMove()
+    {
         bool forwardInput = Input.GetKey(KeyCode.W) ||
-                            Input.GetKey(KeyCode.UpArrow) ||
-                            Input.GetKey(KeyCode.Space);
+                            Input.GetKey(KeyCode.UpArrow);
         bool backwardInput = Input.GetKey(KeyCode.S) ||
                              Input.GetKey(KeyCode.DownArrow);
 
@@ -61,8 +79,34 @@ public class PlayerRunner : MonoBehaviour
         rb.linearVelocity = velocity;
     }
 
+    private void HandleJump()
+    {
+        if (!jumpRequested) return;
+
+        jumpRequested = false;
+
+        if (!IsGrounded()) return;
+
+        Vector3 velocity = rb.linearVelocity;
+        velocity.y = 0f;
+        rb.linearVelocity = velocity;
+
+        rb.AddForce(Vector3.up * jumpImpulse, ForceMode.Impulse);
+    }
+
+    private bool IsGrounded()
+    {
+        return Physics.Raycast(
+            rb.position,
+            Vector3.down,
+            groundCheckDistance,
+            groundLayerMask,
+            QueryTriggerInteraction.Ignore
+        );
+    }
     public void ResetMoveState()
     {
         forwardSpeed = 0f;
+        jumpRequested = false;
     }
 }
