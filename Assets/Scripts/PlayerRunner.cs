@@ -10,6 +10,12 @@ public class PlayerRunner : MonoBehaviour
     // [SerializeField] private float deceleration = 12f;
     [SerializeField] private float sideSpeed = 5f;
 
+    [Header("Rotation")]
+    [SerializeField] private bool faceMoveDirection = true;
+    [SerializeField] private float rotationSpeed = 12f;
+    [SerializeField] private float minSpeedToRotate = 0.1f;
+    [SerializeField] private bool freezeTilt = true;
+
     [Header("Jump")]
     [SerializeField] private float jumpImpulse = 6f;
     [SerializeField] private float groundCheckDistance = 0.6f;
@@ -22,6 +28,11 @@ public class PlayerRunner : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+
+        if (freezeTilt) {
+            rb.constraints |= RigidbodyConstraints.FreezeRotationX |
+                            RigidbodyConstraints.FreezeRotationZ;
+        }
     }
 
     private void Update()
@@ -34,6 +45,7 @@ public class PlayerRunner : MonoBehaviour
     private void FixedUpdate()
     {
         HandleMove();
+        HandleRotation();
         HandleJump();
     }
 
@@ -92,6 +104,34 @@ public class PlayerRunner : MonoBehaviour
         rb.linearVelocity = velocity;
 
         rb.AddForce(Vector3.up * jumpImpulse, ForceMode.Impulse);
+    }
+
+    private void HandleRotation()
+    {
+        if (!faceMoveDirection) return;
+
+        Vector3 horizontalVelocity = new Vector3(
+            rb.linearVelocity.x,
+            0f,
+            rb.linearVelocity.z
+        );
+
+        if (horizontalVelocity.sqrMagnitude < minSpeedToRotate * minSpeedToRotate) {
+            return;
+        }
+
+        Quaternion targetRotation = Quaternion.LookRotation(
+            horizontalVelocity.normalized,
+            Vector3.up
+        );
+
+        Quaternion nextRotation = Quaternion.Slerp(
+            rb.rotation,
+            targetRotation,
+            rotationSpeed * Time.fixedDeltaTime
+        );
+
+        rb.MoveRotation(nextRotation);
     }
 
     private bool IsGrounded()
