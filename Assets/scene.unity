@@ -567,6 +567,7 @@ MonoBehaviour:
   playerRunner: {fileID: 611646295}
   playerImpactLauncher: {fileID: 611646294}
   targetFlightTracker: {fileID: 1359797766}
+  targetWalker: {fileID: 0}
   guiTextColor: {r: 0, g: 0, b: 0, a: 1}
   guiFontSize: 20
 --- !u!4 &744325374
@@ -919,6 +920,7 @@ GameObject:
   - component: {fileID: 1359797762}
   - component: {fileID: 1359797761}
   - component: {fileID: 1359797766}
+  - component: {fileID: 1359797767}
   m_Layer: 0
   m_Name: Target
   m_TagString: Target
@@ -1061,6 +1063,24 @@ MonoBehaviour:
   groundTag: Ground
   minFlightTime: 0.15
   leaveHeightThreshold: 0.15
+--- !u!114 &1359797767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1359797760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c409f1286fa802149adf7a6de45c7080, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TargetWalker
+  walkDirection: {x: -1, y: 0, z: 0}
+  walkSpeed: 6
+  walkDistance: 50
+  walkMode: 1
+  walkOnStart: 1
+  freezeTiltWhileWalking: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
