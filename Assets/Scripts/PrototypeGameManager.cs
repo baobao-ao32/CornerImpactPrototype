@@ -9,6 +9,13 @@ public class PrototypeGameManager : MonoBehaviour
     [SerializeField] private CameraFollow cameraFollow;
     [SerializeField] private PlayerRunner playerRunner;
     [SerializeField] private PlayerImpactLauncher playerImpactLauncher;
+    [SerializeField] private TargetFlightTracker targetFlightTracker;
+
+    [Header("GUI")]
+    [SerializeField] private Color guiTextColor = Color.black;
+    [SerializeField] private int guiFontSize = 30;
+
+    private GUIStyle labelStyle;
 
     private Rigidbody playerRb;
     private Rigidbody targetRb;
@@ -49,10 +56,25 @@ public class PrototypeGameManager : MonoBehaviour
 
     private void OnGUI()
     {
-        float distance = GetHorizontalDistance(targetStartPosition, target.position);
+        if (labelStyle == null) {
+            labelStyle = new GUIStyle(GUI.skin.label);
+        }
+        labelStyle.normal.textColor = guiTextColor;
+        labelStyle.fontSize = guiFontSize;
 
-        GUI.Label(new Rect(10, 10, 400, 30), $"Target Distance: {distance:F2} m");
-        GUI.Label(new Rect(10, 35, 500, 30), "W / Space: Forward, S: Back, A/D: Move, R: Reset");
+        if (targetFlightTracker == null) {
+            GUI.Label(new Rect(10, 10, 500, 30), "TargetFlightTracker is not assigned.");
+            return;
+        }
+
+        float displayDistance = targetFlightTracker.IsLanded
+            ? targetFlightTracker.FinalDistance
+            : targetFlightTracker.CurrentDistance;
+
+        GUI.Label(new Rect(10, 10, 500, 30), $"Distance: {displayDistance:F2} m", labelStyle);
+        GUI.Label(new Rect(10, 35, 500, 30), $"Max Height: {targetFlightTracker.MaxHeight:F2} m", labelStyle);
+        GUI.Label(new Rect(10, 60, 500, 30), $"Flight Time: {targetFlightTracker.FlightTime:F2} s", labelStyle);
+        GUI.Label(new Rect(10, 85, 600, 30), "W / Space: Forward, S: Back, A/D: Move, R: Reset", labelStyle);
     }
 
     private void ResetScene()
@@ -70,6 +92,10 @@ public class PrototypeGameManager : MonoBehaviour
 
         if (cameraFollow != null) {
             cameraFollow.FollowPlayer(true);
+        }
+
+        if (targetFlightTracker != null) {
+            targetFlightTracker.ResetStats();
         }
     }
 
