@@ -411,7 +411,7 @@ MonoBehaviour:
   maxBackwardSpeed: 4
   acceleration: 20
   sideSpeed: 5
-  jumpImpulse: 6
+  jumpImpulse: 15
   groundCheckDistance: 0.6
   groundLayerMask:
     serializedVersion: 2

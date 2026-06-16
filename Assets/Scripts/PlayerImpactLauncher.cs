@@ -15,6 +15,12 @@ public class PlayerImpactLauncher : MonoBehaviour
     [Header("Rotation")]
     [SerializeField] private float torqueMultiplier = 8f;
 
+    [Header("Jump Impact")]
+    [SerializeField] private float maxVerticalSpeedForBonus = 6f;
+    [SerializeField] private float jumpImpulseBonus = 0.35f;
+    [SerializeField] private float jumpUpwardRatioBonus = 0.18f;
+    [SerializeField, Range(0f, 1f)] private float maxUpwardRatio = 0.55f;
+
     [Header("Camera")]
     [SerializeField] private CameraFollow cameraFollow;
     [SerializeField] private bool switchCameraOnImpact = true;
@@ -43,18 +49,31 @@ public class PlayerImpactLauncher : MonoBehaviour
 
         Vector3 playerVelocity = playerRb.linearVelocity;
         Vector3 horizontalVelocity = new Vector3(playerVelocity.x, 0f, playerVelocity.z);
-        float impactSpeed = horizontalVelocity.magnitude;
+        float horizontalSpeed = horizontalVelocity.magnitude;
+        float upwardSpeed = Mathf.Max(0f, playerVelocity.y);
 
-        if(impactSpeed < minImpactSpeed) return;
+        if (horizontalSpeed < minImpactSpeed) {
+            return;
+        }
 
         Vector3 forwardDir = horizontalVelocity.normalized;
 
+        float jumpBonus = Mathf.Clamp01(upwardSpeed / maxVerticalSpeedForBonus);
+        float effectiveUpwardRatio = Mathf.Clamp(
+            upwardRatio + jumpUpwardRatioBonus * jumpBonus,
+            upwardRatio,
+            maxUpwardRatio
+        );
+
         // 前方向 + 上方向。現実世界での物理ではなく、このゲーム向けのネタ物理で、
         // 男の子の発射方向を決める
-        Vector3 launchDir = (forwardDir * (1f - upwardRatio) + Vector3.up * upwardRatio).normalized;
+        Vector3 launchDir = (forwardDir * (1f - effectiveUpwardRatio) + Vector3.up * effectiveUpwardRatio).normalized;
+
+        float baseImpulse = horizontalSpeed * impulseMultiplier;
+        float jumpImpulseMultiplier = 1f + jumpImpulseBonus * jumpBonus;
 
         float impulse = Mathf.Clamp(
-            impactSpeed * impulseMultiplier,
+            baseImpulse * jumpImpulseMultiplier,
             minImpulse, maxImpulse
         );
 
@@ -69,7 +88,7 @@ public class PlayerImpactLauncher : MonoBehaviour
         // 宙に浮いている間は雑に回転させる
         Vector3 torqueAxis = Vector3.Cross(launchDir, Vector3.up).normalized;
         if (torqueAxis.sqrMagnitude > 0.001f) {
-            targetRb.AddTorque(torqueAxis * impactSpeed * torqueMultiplier, ForceMode.Impulse);
+            targetRb.AddTorque(torqueAxis * horizontalSpeed * torqueMultiplier, ForceMode.Impulse);
         }
 
         if (targetFlightTracker != null) {
@@ -82,7 +101,10 @@ public class PlayerImpactLauncher : MonoBehaviour
             cameraFollow.FollowLaunchedTarget(targetRb.transform);
         }
 
-        Debug.Log($"Impact!! speed={impactSpeed:F2}, impulse={impulse:F2}");
+        Debug.Log(
+            $"Impact!! horizontal={horizontalSpeed:F2}, upward={upwardSpeed:F2}, " +
+            $"jumpBonus={jumpBonus:F2}, upwardRatio={effectiveUpwardRatio:F2}, impulse={impulse:F2}"
+        );
     }
 
     public void ResetImpactState()
