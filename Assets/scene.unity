@@ -394,6 +394,7 @@ MonoBehaviour:
   torqueMultiplier: 8
   cameraFollow: {fileID: 73038927}
   switchCameraOnImpact: 1
+  targetFlightTracker: {fileID: 1359797766}
 --- !u!114 &611646295
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,6 +408,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerRunner
   maxForwardSpeed: 12
+  maxBackwardSpeed: 4
   acceleration: 20
   sideSpeed: 5
 --- !u!1 &659289022
@@ -423,7 +425,7 @@ GameObject:
   - component: {fileID: 659289023}
   m_Layer: 0
   m_Name: Road
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -516,7 +518,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.05, z: 0}
-  m_LocalScale: {x: 4, y: 0.1, z: 30}
+  m_LocalScale: {x: 300, y: 0.1, z: 300}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -555,6 +557,9 @@ MonoBehaviour:
   cameraFollow: {fileID: 73038927}
   playerRunner: {fileID: 611646295}
   playerImpactLauncher: {fileID: 611646294}
+  targetFlightTracker: {fileID: 1359797766}
+  guiTextColor: {r: 0, g: 0, b: 0, a: 1}
+  guiFontSize: 20
 --- !u!4 &744325374
 Transform:
   m_ObjectHideFlags: 0
@@ -680,6 +685,7 @@ GameObject:
   - component: {fileID: 1359797763}
   - component: {fileID: 1359797762}
   - component: {fileID: 1359797761}
+  - component: {fileID: 1359797766}
   m_Layer: 0
   m_Name: Target
   m_TagString: Target
@@ -807,6 +813,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1359797766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1359797760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: baea5e51412a5654d80050a63053185a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TargetFlightTracker
+  groundTag: Ground
+  minFlightTime: 0.15
+  leaveHeightThreshold: 0.15
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
