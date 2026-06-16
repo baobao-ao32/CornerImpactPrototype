@@ -19,6 +19,9 @@ public class PlayerImpactLauncher : MonoBehaviour
     [SerializeField] private CameraFollow cameraFollow;
     [SerializeField] private bool switchCameraOnImpact = true;
 
+    [Header("Flight Stats")]
+    [SerializeField] private TargetFlightTracker targetFlightTracker;
+
     private Rigidbody playerRb;
     private bool hasLaunched;
 
@@ -67,6 +70,10 @@ public class PlayerImpactLauncher : MonoBehaviour
         Vector3 torqueAxis = Vector3.Cross(launchDir, Vector3.up).normalized;
         if (torqueAxis.sqrMagnitude > 0.001f) {
             targetRb.AddTorque(torqueAxis * impactSpeed * torqueMultiplier, ForceMode.Impulse);
+        }
+
+        if (targetFlightTracker != null) {
+            targetFlightTracker.BeginFlight(targetRb.position);
         }
 
         hasLaunched = true;
