@@ -16,6 +16,10 @@ public class TargetWalker : MonoBehaviour
     [SerializeField] private WalkMode walkMode = WalkMode.PingPong;
     [SerializeField] private bool walkOnStart = true;
 
+    [Header("Rotation")]
+    [SerializeField] private bool faceWalkDirection = true;
+    [SerializeField] private float rotationSpeed = 12f;
+
     [Header("Timing")]
     [SerializeField] private float startDelay = 1.5f;
 
@@ -25,6 +29,7 @@ public class TargetWalker : MonoBehaviour
     private Rigidbody rb;
     private Vector3 normalizedDirection;
     private RigidbodyConstraints originalConstraints;
+    private Quaternion targetRotation;
 
     private bool isWaiting;
     private bool isWalking;
@@ -71,7 +76,12 @@ public class TargetWalker : MonoBehaviour
         float remainingDistance = walkDistance - traveledDistance;
         float actualMoveAmount = Mathf.Min(moveAmount, remainingDistance);
 
-        Vector3 delta = normalizedDirection * directionSign * actualMoveAmount;
+        Vector3 moveDirection = normalizedDirection * directionSign;
+        Vector3 delta = moveDirection * actualMoveAmount;
+
+        if (faceWalkDirection) {
+            RotateToward(moveDirection);
+        }
 
         rb.MovePosition(rb.position + delta);
 
@@ -87,6 +97,10 @@ public class TargetWalker : MonoBehaviour
         if (walkMode == WalkMode.PingPong) {
             directionSign *= -1;
             traveledDistance = 0f;
+
+            if (faceWalkDirection) {
+                UpdateTargetRotation();
+            }
         }
         else {
             StopWalking();
@@ -116,6 +130,11 @@ public class TargetWalker : MonoBehaviour
                 RigidbodyConstraints.FreezeRotationZ;
         }
 
+        if (faceWalkDirection) {
+            UpdateTargetRotation();
+            rb.rotation = targetRotation;
+        }
+
         if (walkOnStart) {
             waitTimer = Mathf.Max(0f, startDelay);
             isWaiting = waitTimer > 0f;
@@ -134,5 +153,36 @@ public class TargetWalker : MonoBehaviour
         }
 
         return walkDirection.normalized;
+    }
+
+    private void RotateToward(Vector3 direction)
+    {
+        Vector3 horizontalDirection = new Vector3(direction.x, 0f, direction.z);
+
+        if (horizontalDirection.sqrMagnitude < 0.001f) {
+            return;
+        }
+
+        targetRotation = Quaternion.LookRotation(horizontalDirection.normalized, Vector3.up);
+
+        Quaternion nextRotation = Quaternion.Slerp(
+            rb.rotation,
+            targetRotation,
+            rotationSpeed * Time.fixedDeltaTime
+        );
+
+        rb.MoveRotation(nextRotation);
+    }
+
+    private void UpdateTargetRotation()
+    {
+        Vector3 direction = normalizedDirection * directionSign;
+        Vector3 horizontalDirection = new Vector3(direction.x, 0f, direction.z);
+
+        if (horizontalDirection.sqrMagnitude < 0.001f) {
+            horizontalDirection = Vector3.left;
+        }
+
+        targetRotation = Quaternion.LookRotation(horizontalDirection.normalized, Vector3.up);
     }
 }
