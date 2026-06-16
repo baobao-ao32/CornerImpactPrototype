@@ -224,10 +224,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9553927039b946d4d9c8a372e054f29e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
-  target: {fileID: 611646293}
-  offset: {x: 0, y: 6, z: -10}
+  playerTarget: {fileID: 611646293}
+  playerOffset: {x: 0, y: 6, z: -10}
+  playerLookOffset: {x: 0, y: 1, z: 4}
+  targetOffset: {x: 0, y: 5, z: -8}
+  targetLookOffset: {x: 0, y: 1, z: 0}
   followSpeed: 8
-  lookOffset: {x: 0, y: 1, z: 4}
+  rotateSpeed: 10
 --- !u!1 &611646288
 GameObject:
   m_ObjectHideFlags: 0
@@ -389,6 +392,8 @@ MonoBehaviour:
   maxImpulse: 35
   upwardRatio: 0.28
   torqueMultiplier: 8
+  cameraFollow: {fileID: 73038927}
+  switchCameraOnImpact: 1
 --- !u!114 &611646295
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -547,6 +552,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PrototypeGameManager
   player: {fileID: 611646293}
   target: {fileID: 1359797765}
+  cameraFollow: {fileID: 73038927}
+  playerRunner: {fileID: 611646295}
+  playerImpactLauncher: {fileID: 611646294}
 --- !u!4 &744325374
 Transform:
   m_ObjectHideFlags: 0
