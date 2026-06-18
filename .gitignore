@@ -11,6 +11,16 @@
 /[Mm]emoryCaptures/
 /[Rr]ecordings/
 
+# Third-party character assets - local only
+/Assets/UnityChan*/
+/Assets/UnityChan*.meta
+/Assets/Unity-chan*/
+/Assets/Unity-chan*.meta
+/Assets/README_UnityChan_en.txt
+/Assets/README_UnityChan_en.txt.meta
+/Assets/README_UnityChan_jp.txt
+/Assets/README_UnityChan_jp.txt.meta
+
 # IDE / editor
 .vs/
 .vscode/
