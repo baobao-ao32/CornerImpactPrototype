@@ -41,6 +41,7 @@ public class TargetWalker : MonoBehaviour
     public bool IsWalking => isWalking;
     public bool HasFinishedWalk { get; private set; }
     public Vector3 CurrentMoveDirection => normalizedDirection * directionSign;
+    public float CurrentMoveSpeed => isWalking ? Mathf.Abs(walkSpeed) : 0f;
 
     private void Awake()
     {

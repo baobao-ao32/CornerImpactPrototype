@@ -84,6 +84,13 @@ public class PlayerImpactLauncher : MonoBehaviour
             targetWalker.StopWalking();
         }
 
+        // ぶつかったときのポーズ -> 空中飛行中のポーズ
+        TargetFlightPoseController poseController = collision.gameObject.GetComponent<TargetFlightPoseController>();
+        if (poseController != null) {
+            poseController.PlayHitReaction();
+            poseController.ApplyFlightPose();
+        }
+
         ContactPoint contact = collision.GetContact(0);
 
         targetRb.AddForceAtPosition(

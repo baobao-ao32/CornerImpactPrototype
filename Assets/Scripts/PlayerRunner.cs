@@ -25,6 +25,25 @@ public class PlayerRunner : MonoBehaviour
     private float forwardSpeed;
     private bool jumpRequested;
 
+    public bool IsGroundedNow { get; private set; }
+    public float VerticalSpeed => rb != null ? rb.linearVelocity.y : 0f;
+
+    public float HorizontalSpeed
+    {
+        get
+        {
+            if (rb == null) return 0f;
+
+            Vector3 horizontalVelocity = new Vector3(
+                rb.linearVelocity.x,
+                0f,
+                rb.linearVelocity.z
+            );
+
+            return horizontalVelocity.magnitude;
+        }
+    }
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -44,6 +63,8 @@ public class PlayerRunner : MonoBehaviour
 
     private void FixedUpdate()
     {
+        IsGroundedNow = CheckGrounded();
+
         HandleMove();
         HandleRotation();
         HandleJump();
@@ -97,13 +118,15 @@ public class PlayerRunner : MonoBehaviour
 
         jumpRequested = false;
 
-        if (!IsGrounded()) return;
+        if (!IsGroundedNow) return;
 
         Vector3 velocity = rb.linearVelocity;
         velocity.y = 0f;
         rb.linearVelocity = velocity;
 
         rb.AddForce(Vector3.up * jumpImpulse, ForceMode.Impulse);
+
+        IsGroundedNow = false;
     }
 
     private void HandleRotation()
@@ -134,7 +157,7 @@ public class PlayerRunner : MonoBehaviour
         rb.MoveRotation(nextRotation);
     }
 
-    private bool IsGrounded()
+    private bool CheckGrounded()
     {
         return Physics.Raycast(
             rb.position,

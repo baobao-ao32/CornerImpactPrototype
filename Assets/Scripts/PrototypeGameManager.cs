@@ -18,6 +18,7 @@ public class PrototypeGameManager : MonoBehaviour
     [SerializeField] private PlayerImpactLauncher playerImpactLauncher;
     [SerializeField] private TargetFlightTracker targetFlightTracker;
     [SerializeField] private TargetWalker targetWalker;
+    [SerializeField] private TargetFlightPoseController targetFlightPoseController;
 
     [Header("GUI")]
     [SerializeField] private Color guiTextColor = Color.black;
@@ -29,9 +30,6 @@ public class PrototypeGameManager : MonoBehaviour
     [SerializeField] private float passMissDistance = 5f;
 
     private RoundState roundState = RoundState.Playing;
-    private bool missCheckArmed;
-    private float closestPlayerTargetDistance;
-
 
     private GUIStyle labelStyle;
 
@@ -61,6 +59,10 @@ public class PrototypeGameManager : MonoBehaviour
             targetWalker = target.GetComponent<TargetWalker>();
         }
 
+        if (targetFlightPoseController == null) {
+            targetFlightPoseController = target.GetComponent<TargetFlightPoseController>();
+        }
+
         playerStartPosition = player.position;
         playerStartRotation = player.rotation;
 
@@ -68,8 +70,6 @@ public class PrototypeGameManager : MonoBehaviour
         targetStartRotation = target.rotation;
 
         roundState = RoundState.Playing;
-        missCheckArmed = false;
-        closestPlayerTargetDistance = float.PositiveInfinity;
     }
 
     // Update is called once per frame
@@ -199,6 +199,10 @@ public class PrototypeGameManager : MonoBehaviour
 
         if (targetFlightTracker != null) {
             targetFlightTracker.ResetStats();
+        }
+
+        if (targetFlightPoseController != null) {
+            targetFlightPoseController.ResetPose();
         }
 
         if (targetWalker != null) {
