@@ -7,7 +7,6 @@ public class PlayerRunner : MonoBehaviour
     [SerializeField] private float maxForwardSpeed = 12f;
     [SerializeField] private float maxBackwardSpeed = 4f;
     [SerializeField] private float acceleration = 20f;
-    // [SerializeField] private float deceleration = 12f;
     [SerializeField] private float sideSpeed = 5f;
 
     [Header("Rotation")]
@@ -16,8 +15,14 @@ public class PlayerRunner : MonoBehaviour
     [SerializeField] private float minSpeedToRotate = 0.1f;
     [SerializeField] private bool freezeTilt = true;
 
+    [Header("Facing Lock")]
+    [Tooltip("指定キーを押している間は身体の向きを固定し、現在の向きを基準に移動します。")]
+    [SerializeField] private KeyCode facingLockKey = KeyCode.LeftShift;
+    [SerializeField] private bool allowRightShift = true;
+
     [Header("Jump")]
-    [SerializeField] private float jumpImpulse = 6f;
+    [Tooltip("ジャンプ直後の上向き速度（m/s）")]
+    [SerializeField] private float jumpSpeed = 5f;
     [SerializeField] private float groundCheckDistance = 0.6f;
     [SerializeField] private LayerMask groundLayerMask = ~0;
 
@@ -26,7 +31,9 @@ public class PlayerRunner : MonoBehaviour
     private bool jumpRequested;
 
     public bool IsGroundedNow { get; private set; }
+    public bool IsFacingLocked { get; private set; }
     public float VerticalSpeed => rb != null ? rb.linearVelocity.y : 0f;
+    public float ForwardSpeed => forwardSpeed;
 
     public float HorizontalSpeed
     {
@@ -50,7 +57,7 @@ public class PlayerRunner : MonoBehaviour
 
         if (freezeTilt) {
             rb.constraints |= RigidbodyConstraints.FreezeRotationX |
-                            RigidbodyConstraints.FreezeRotationZ;
+                              RigidbodyConstraints.FreezeRotationZ;
         }
     }
 
@@ -64,6 +71,7 @@ public class PlayerRunner : MonoBehaviour
     private void FixedUpdate()
     {
         IsGroundedNow = CheckGrounded();
+        IsFacingLocked = IsFacingLockPressed();
 
         HandleMove();
         HandleRotation();
@@ -101,15 +109,66 @@ public class PlayerRunner : MonoBehaviour
             );
         }
 
-        forwardSpeed = Mathf.Clamp(forwardSpeed, -maxBackwardSpeed, maxForwardSpeed);
+        // 通常時のSは移動方向へ振り向いて走るため、前進と同じ最高速度を使う。
+        // Shift中は、W単独だけmaxForwardSpeedを許可し、S/A/Dを含む移動は
+        // maxBackwardSpeedへ制限する。
+        bool hasHorizontalInput = !Mathf.Approximately(horizontal, 0f);
+        bool isLockedForwardOnly = IsFacingLocked &&
+                                   forwardInput &&
+                                   !backwardInput &&
+                                   !hasHorizontalInput;
 
-        Vector3 velocity = new Vector3(
-            horizontal * sideSpeed,
-            rb.linearVelocity.y,
-            forwardSpeed
+        float lockedMoveSpeedLimit = isLockedForwardOnly
+            ? maxForwardSpeed
+            : maxBackwardSpeed;
+
+        float positiveSpeedLimit = IsFacingLocked
+            ? lockedMoveSpeedLimit
+            : maxForwardSpeed;
+
+        float negativeSpeedLimit = IsFacingLocked
+            ? maxBackwardSpeed
+            : maxForwardSpeed;
+
+        forwardSpeed = Mathf.Clamp(
+            forwardSpeed,
+            -negativeSpeedLimit,
+            positiveSpeedLimit
         );
 
-        rb.linearVelocity = velocity;
+        Vector3 horizontalVelocity;
+
+        if (IsFacingLocked) {
+            // Shift中はPlayerの現在の向きを基準に移動する。
+            // Sで後ずさり、A/Dですり足になる。
+            Vector3 localVelocity = new Vector3(
+                horizontal * maxBackwardSpeed,
+                0f,
+                forwardSpeed
+            );
+
+            // 斜め入力で速度が合成され、上限を超えないようにする。
+            localVelocity = Vector3.ClampMagnitude(
+                localVelocity,
+                lockedMoveSpeedLimit
+            );
+
+            horizontalVelocity = rb.rotation * localVelocity;
+        }
+        else {
+            // 通常時はワールド座標基準のストレイフ移動。
+            horizontalVelocity = new Vector3(
+                horizontal * sideSpeed,
+                0f,
+                forwardSpeed
+            );
+        }
+
+        rb.linearVelocity = new Vector3(
+            horizontalVelocity.x,
+            rb.linearVelocity.y,
+            horizontalVelocity.z
+        );
     }
 
     private void HandleJump()
@@ -121,17 +180,15 @@ public class PlayerRunner : MonoBehaviour
         if (!IsGroundedNow) return;
 
         Vector3 velocity = rb.linearVelocity;
-        velocity.y = 0f;
+        velocity.y = jumpSpeed;
         rb.linearVelocity = velocity;
-
-        rb.AddForce(Vector3.up * jumpImpulse, ForceMode.Impulse);
 
         IsGroundedNow = false;
     }
 
     private void HandleRotation()
     {
-        if (!faceMoveDirection) return;
+        if (!faceMoveDirection || IsFacingLocked) return;
 
         Vector3 horizontalVelocity = new Vector3(
             rb.linearVelocity.x,
@@ -155,6 +212,15 @@ public class PlayerRunner : MonoBehaviour
         );
 
         rb.MoveRotation(nextRotation);
+    }
+
+    private bool IsFacingLockPressed()
+    {
+        if (Input.GetKey(facingLockKey)) {
+            return true;
+        }
+
+        return allowRightShift && Input.GetKey(KeyCode.RightShift);
     }
 
     private bool CheckGrounded()

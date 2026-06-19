@@ -22,6 +22,8 @@ public class TargetFlightTracker : MonoBehaviour
 
     private float maxY;
 
+    private Quaternion previousRotation;
+    private float accumulatedRotationDegrees;
 
     public bool IsTracking => isTracking;
     public bool IsLanded => isLanded;
@@ -30,6 +32,7 @@ public class TargetFlightTracker : MonoBehaviour
     public float FinalDistance { get; private set; }
     public float MaxHeight { get; private set; }
     public float FlightTime { get; private set; }
+    public float RotationCount => accumulatedRotationDegrees / 360f;
 
     private void Awake()
     {
@@ -95,6 +98,9 @@ public class TargetFlightTracker : MonoBehaviour
         launchTime = 0f;
         landingTime = 0f;
         maxY = launchPosition.y;
+
+        previousRotation = rb != null ? rb.rotation : transform.rotation;
+        accumulatedRotationDegrees = 0f;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -128,6 +134,9 @@ public class TargetFlightTracker : MonoBehaviour
 
     private void EndFlight()
     {
+        // FixedUpdateの後に発生した最後の物理ステップ分も取りこぼさないようにする
+        AccumulateRotation();
+
         isLanded = true;
         isTracking = false;
 
@@ -136,6 +145,15 @@ public class TargetFlightTracker : MonoBehaviour
 
         FinalDistance = GetHorizontalDistance(launchPosition, landingPosition);
         FlightTime = landingTime - launchTime;
+    }
+
+    private void AccumulateRotation()
+    {
+        Quaternion currentRotation = rb.rotation;
+        float deltaAngle = Quaternion.Angle(previousRotation, currentRotation);
+
+        accumulatedRotationDegrees += deltaAngle;
+        previousRotation = currentRotation;
     }
 
     private float GetHorizontalDistance(Vector3 from, Vector3 to)

@@ -25,8 +25,6 @@ public class PrototypeGameManager : MonoBehaviour
     [SerializeField] private int guiFontSize = 100;
 
     [Header("Miss")]
-    [SerializeField] private float missArmDistance = 15f;
-    [SerializeField] private float missDistance = 35f;
     [SerializeField] private float passMissDistance = 5f;
 
     private RoundState roundState = RoundState.Playing;
@@ -177,7 +175,8 @@ public class PrototypeGameManager : MonoBehaviour
         GUI.Label(new Rect(10, 35, 700, 30), $"Distance: {displayDistance:F2} m", labelStyle);
         GUI.Label(new Rect(10, 60, 700, 30), $"Max Height: {targetFlightTracker.MaxHeight:F2} m", labelStyle);
         GUI.Label(new Rect(10, 85, 700, 30), $"Flight Time: {targetFlightTracker.FlightTime:F2} s", labelStyle);
-        GUI.Label(new Rect(10, 110, 900, 30), "R: Reset", labelStyle);
+        GUI.Label(new Rect(10, 110, 700, 30), $"Rotations: {targetFlightTracker.RotationCount:F1}", labelStyle);
+        GUI.Label(new Rect(10, 135, 900, 30), "R: Reset", labelStyle);
     }
 
     private void ResetScene()

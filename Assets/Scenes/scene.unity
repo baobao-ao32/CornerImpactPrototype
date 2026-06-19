@@ -245,8 +245,8 @@ GameObject:
   - component: {fileID: 501802289}
   - component: {fileID: 501802293}
   - component: {fileID: 501802295}
-  - component: {fileID: 501802296}
   - component: {fileID: 501802297}
+  - component: {fileID: 501802298}
   m_Layer: 0
   m_Name: Player2
   m_TagString: Player
@@ -401,31 +401,6 @@ MonoBehaviour:
   cameraFollow: {fileID: 73038927}
   switchCameraOnImpact: 1
   targetFlightTracker: {fileID: 2070377808}
---- !u!114 &501802296
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 501802288}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a55b6ed47d08a443b563330b7f4072f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerRunner
-  maxForwardSpeed: 12
-  maxBackwardSpeed: 4
-  acceleration: 20
-  sideSpeed: 5
-  faceMoveDirection: 1
-  rotationSpeed: 12
-  minSpeedToRotate: 0.1
-  freezeTilt: 1
-  jumpImpulse: 15
-  groundCheckDistance: 0.6
-  groundLayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &501802297
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -439,12 +414,39 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimationController
   animator: {fileID: 1951384939}
-  playerRunner: {fileID: 501802296}
+  playerRunner: {fileID: 0}
   moveSpeedParameter: MoveSpeed
   isGroundedParameter: IsGrounded
   verticalSpeedParameter: VerticalSpeed
   referenceRunSpeed: 12
   dampingTime: 0.1
+--- !u!114 &501802298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501802288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b744781694df893448b7b9436aa3ca3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerRunner
+  maxForwardSpeed: 12
+  maxBackwardSpeed: 4
+  acceleration: 20
+  sideSpeed: 5
+  faceMoveDirection: 1
+  rotationSpeed: 12
+  minSpeedToRotate: 0.1
+  freezeTilt: 1
+  facingLockKey: 304
+  allowRightShift: 1
+  jumpSpeed: 5
+  groundCheckDistance: 0.6
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1001 &522824368
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1176,7 +1178,8 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 11400000, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1293,7 +1296,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.05, z: 0}
-  m_LocalScale: {x: 1000, y: 0.1, z: 300}
+  m_LocalScale: {x: 5000, y: 0.1, z: 5000}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1330,15 +1333,13 @@ MonoBehaviour:
   player: {fileID: 501802292}
   target: {fileID: 2070377805}
   cameraFollow: {fileID: 73038927}
-  playerRunner: {fileID: 501802296}
+  playerRunner: {fileID: 0}
   playerImpactLauncher: {fileID: 501802295}
   targetFlightTracker: {fileID: 2070377808}
   targetWalker: {fileID: 2070377807}
   targetFlightPoseController: {fileID: 2070377810}
   guiTextColor: {r: 0, g: 0, b: 0, a: 1}
   guiFontSize: 20
-  missArmDistance: 15
-  missDistance: 35
   passMissDistance: 5
 --- !u!4 &744325374
 Transform:
@@ -1803,7 +1804,7 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: d39f5d027836fe64db8d985b437f4bc9, type: 2}
     - target: {fileID: 11400000, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 11400002, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
       propertyPath: m_Enabled
@@ -1813,7 +1814,8 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 11400000, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1940,7 +1942,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 20, y: 1, z: 35}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1510578458}
