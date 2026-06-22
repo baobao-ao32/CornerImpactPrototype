@@ -227,10 +227,13 @@ MonoBehaviour:
   playerTarget: {fileID: 501802292}
   playerOffset: {x: 0, y: 3.5, z: -5}
   playerLookOffset: {x: 0, y: 1.2, z: 2.5}
+  impactObserverOffset: {x: 0, y: 4.5, z: -7}
+  impactTargetLookOffset: {x: 0, y: 1, z: 0}
+  impactObserverDuration: 2.5
   targetOffset: {x: 0, y: 5, z: -8}
   targetLookOffset: {x: 0, y: 1, z: 0}
-  followSpeed: 8
-  rotateSpeed: 10
+  followSpeed: 10
+  rotateSpeed: 12
 --- !u!1 &501802288
 GameObject:
   m_ObjectHideFlags: 0

@@ -16,7 +16,7 @@ public class PlayerImpactLauncher : MonoBehaviour
     [SerializeField] private float torqueMultiplier = 8f;
 
     [Header("Jump Impact")]
-    [SerializeField] private float maxVerticalSpeedForBonus = 5f;
+    [SerializeField] private float maxVerticalSpeedForBonus = 6f;
     [SerializeField] private float jumpImpulseBonus = 0.35f;
     [SerializeField] private float jumpUpwardRatioBonus = 0.15f;
     [SerializeField, Range(0f, 1f)] private float maxUpwardRatio = 0.62f;
