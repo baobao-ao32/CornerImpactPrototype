@@ -19,17 +19,25 @@ public class PrototypeGameManager : MonoBehaviour
     [SerializeField] private TargetFlightTracker targetFlightTracker;
     [SerializeField] private TargetWalker targetWalker;
     [SerializeField] private TargetFlightPoseController targetFlightPoseController;
+    [SerializeField] private ResultPresenter resultPresenter;
 
-    [Header("GUI")]
-    [SerializeField] private Color guiTextColor = Color.black;
-    [SerializeField] private int guiFontSize = 100;
+    [Header("Prototype Score")]
+    [Tooltip("飛距離1mあたりの得点")]
+    [SerializeField] private float distanceScorePerMeter = 100f;
+
+    [Tooltip("最高到達点1mあたりのボーナス")]
+    [SerializeField] private float heightScorePerMeter = 50f;
+
+    [Tooltip("滞空時間1秒あたりのボーナス")]
+    [SerializeField] private float flightTimeScorePerSecond = 100f;
+
+    [Tooltip("1回転あたりのボーナス")]
+    [SerializeField] private float rotationScorePerTurn = 500f;
 
     [Header("Miss")]
     [SerializeField] private float passMissDistance = 5f;
 
     private RoundState roundState = RoundState.Playing;
-
-    private GUIStyle labelStyle;
 
     private Rigidbody playerRb;
     private Rigidbody targetRb;
@@ -39,6 +47,9 @@ public class PrototypeGameManager : MonoBehaviour
 
     private Vector3 targetStartPosition;
     private Quaternion targetStartRotation;
+
+    private int penaltyPoints;
+    private bool resultShown;
 
     private void Awake()
     {
@@ -68,9 +79,12 @@ public class PrototypeGameManager : MonoBehaviour
         targetStartRotation = target.rotation;
 
         roundState = RoundState.Playing;
+        penaltyPoints = 0;
+        resultShown = false;
+
+        resultPresenter?.HideImmediate();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if(Input.GetKeyDown(KeyCode.R)) {
@@ -78,6 +92,7 @@ public class PrototypeGameManager : MonoBehaviour
         }
 
         UpdateRoundState();
+        UpdateResultUI();
     }
 
     private void UpdateRoundState()
@@ -101,13 +116,36 @@ public class PrototypeGameManager : MonoBehaviour
         }
     }
 
-    private bool HasTargetPassedPlayer()
+    private void UpdateResultUI()
     {
-        if (targetWalker == null) {
-            return false;
+        if (resultShown || resultPresenter == null) {
+            return;
         }
 
-        if (!targetWalker.IsWalking) {
+        if (roundState != RoundState.Hit) {
+            return;
+        }
+
+        if (targetFlightTracker == null || !targetFlightTracker.IsLanded) {
+            return;
+        }
+
+        ResultData result = new ResultData(
+            targetFlightTracker.FinalDistance,
+            targetFlightTracker.MaxHeight,
+            targetFlightTracker.FlightTime,
+            targetFlightTracker.RotationCount,
+            penaltyPoints,
+            CalculateFinalScore()
+        );
+
+        resultPresenter.ShowResult(result);
+        resultShown = true;
+    }
+
+    private bool HasTargetPassedPlayer()
+    {
+        if (targetWalker == null || !targetWalker.IsWalking) {
             return false;
         }
 
@@ -135,48 +173,38 @@ public class PrototypeGameManager : MonoBehaviour
     {
         roundState = RoundState.Miss;
 
-        if (cameraFollow != null) {
-            cameraFollow.FollowPlayer(true);
+        cameraFollow?.FollowPlayer(true);
+
+        if (resultPresenter != null) {
+            resultPresenter.ShowMiss();
+            resultShown = true;
         }
 
         Debug.Log("Miss");
     }
 
-    private void OnGUI()
+    private int CalculateFinalScore()
     {
-        if (labelStyle == null) {
-            labelStyle = new GUIStyle(GUI.skin.label);
-        }
-        labelStyle.normal.textColor = guiTextColor;
-        labelStyle.fontSize = guiFontSize;
-
         if (targetFlightTracker == null) {
-            GUI.Label(new Rect(10, 10, 500, 30), "TargetFlightTracker is not assigned.");
-            return;
+            return 0;
         }
 
-        if (roundState == RoundState.Playing) {
-            GUI.Label(new Rect(10, 10, 500, 30), "Playing", labelStyle);
-            GUI.Label(new Rect(10, 35, 800, 30), "W/S/A/D: Move, Space: Jump, R: Reset", labelStyle);
-            return;
-        }
+        float rawScore =
+            targetFlightTracker.FinalDistance * distanceScorePerMeter +
+            targetFlightTracker.MaxHeight * heightScorePerMeter +
+            targetFlightTracker.FlightTime * flightTimeScorePerSecond +
+            targetFlightTracker.RotationCount * rotationScorePerTurn;
 
-        if (roundState == RoundState.Miss) {
-            GUI.Label(new Rect(10, 10, 700, 30), "MISS!!", labelStyle);
-            GUI.Label(new Rect(10, 35, 900, 30), "R: Reset", labelStyle);
-            return;
-        }
+        int roundedScore = Mathf.RoundToInt(rawScore);
+        return Mathf.Max(0, roundedScore - penaltyPoints);
+    }
 
-        float displayDistance = targetFlightTracker.IsLanded
-            ? targetFlightTracker.FinalDistance
-            : targetFlightTracker.CurrentDistance;
-
-        GUI.Label(new Rect(10, 10, 700, 30), "HIT!!", labelStyle);
-        GUI.Label(new Rect(10, 35, 700, 30), $"Distance: {displayDistance:F2} m", labelStyle);
-        GUI.Label(new Rect(10, 60, 700, 30), $"Max Height: {targetFlightTracker.MaxHeight:F2} m", labelStyle);
-        GUI.Label(new Rect(10, 85, 700, 30), $"Flight Time: {targetFlightTracker.FlightTime:F2} s", labelStyle);
-        GUI.Label(new Rect(10, 110, 700, 30), $"Rotations: {targetFlightTracker.RotationCount:F1}", labelStyle);
-        GUI.Label(new Rect(10, 135, 900, 30), "R: Reset", labelStyle);
+    /// <summary>
+    /// 将来、通行人や障害物への接触から呼ぶ。
+    /// </summary>
+    public void AddPenalty(int points)
+    {
+        penaltyPoints += Mathf.Max(0, points);
     }
 
     private void ResetScene()
@@ -184,30 +212,16 @@ public class PrototypeGameManager : MonoBehaviour
         ResetBody(player, playerRb, playerStartPosition, playerStartRotation);
         ResetBody(target, targetRb, targetStartPosition, targetStartRotation);
 
-        if (playerRunner != null) {
-            playerRunner.ResetMoveState();
-        }
+        playerRunner?.ResetMoveState();
+        playerImpactLauncher?.ResetImpactState();
+        cameraFollow?.FollowPlayer(true);
+        targetFlightTracker?.ResetStats();
+        targetFlightPoseController?.ResetPose();
+        targetWalker?.ResetWalkState();
+        resultPresenter?.HideImmediate();
 
-        if (playerImpactLauncher != null) {
-            playerImpactLauncher.ResetImpactState();
-        }
-
-        if (cameraFollow != null) {
-            cameraFollow.FollowPlayer(true);
-        }
-
-        if (targetFlightTracker != null) {
-            targetFlightTracker.ResetStats();
-        }
-
-        if (targetFlightPoseController != null) {
-            targetFlightPoseController.ResetPose();
-        }
-
-        if (targetWalker != null) {
-            targetWalker.ResetWalkState();
-        }
-
+        penaltyPoints = 0;
+        resultShown = false;
         roundState = RoundState.Playing;
     }
 
@@ -220,13 +234,5 @@ public class PrototypeGameManager : MonoBehaviour
         bodyRb.rotation = rotation;
 
         bodyTransform.SetPositionAndRotation(position, rotation);
-    }
-
-    private float GetHorizontalDistance(Vector3 from, Vector3 to)
-    {
-        Vector2 a = new Vector2(from.x, from.z);
-        Vector2 b = new Vector2(to.x, to.z);
-
-        return Vector2.Distance(a, b);
     }
 }
