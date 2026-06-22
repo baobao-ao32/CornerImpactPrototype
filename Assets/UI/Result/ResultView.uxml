@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="ResultView.uss" />
+
+    <ui:VisualElement name="result-screen" class="result-screen">
+        <ui:VisualElement class="result-dimmer" />
+
+        <ui:VisualElement name="result-board" class="result-board">
+            <ui:Label name="title" text="R E S U L T" class="result-title" />
+
+            <ui:VisualElement class="score-list">
+                <ui:VisualElement class="score-row">
+                    <ui:Label text="DISTANCE" class="score-label" />
+                    <ui:Label name="distance-value" text="0.00 m" class="score-value" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="score-row">
+                    <ui:Label text="MAX HEIGHT" class="score-label" />
+                    <ui:Label name="max-height-value" text="0.00 m" class="score-value" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="score-row">
+                    <ui:Label text="FLIGHT TIME" class="score-label" />
+                    <ui:Label name="flight-time-value" text="0.00 s" class="score-value" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="score-row">
+                    <ui:Label text="ROTATIONS" class="score-label" />
+                    <ui:Label name="rotations-value" text="0.0" class="score-value" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="score-row penalty-row">
+                    <ui:Label text="PENALTY" class="score-label" />
+                    <ui:Label name="penalty-value" text="-0 pt" class="score-value penalty-value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="score-separator" />
+
+            <ui:VisualElement class="final-score-row">
+                <ui:Label text="FINAL SCORE" class="final-score-label" />
+                <ui:Label name="final-score-value" text="0 pt" class="final-score-value" />
+            </ui:VisualElement>
+
+            <ui:Label name="reset-hint" text="R : RESET" class="reset-hint" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
